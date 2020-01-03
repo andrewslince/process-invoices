@@ -22,6 +22,23 @@ function getRawAmount(amount, currencySymbol) {
 /*                              INVOICE PROCESS                             */
 /****************************************************************************/
 
+function processChargeGroups(charges, groups) {
+  var processedGroups = [];
+
+  if (groups && groups.length) {
+    charges.forEach(function(charge) {
+      groups.forEach(function(group) {
+        if (charge.description.includes(groups)) {
+
+        }
+      });
+      console.log("charge", charge);
+    });
+  }
+
+  return processedGroups;
+}
+
 function getInvoices(type) {
   var invoicesSelector = (type === "all")
 
@@ -35,10 +52,15 @@ function getInvoices(type) {
   return Array.from(document.querySelectorAll(invoicesSelector));
 }
 
-function getInvoiceInfo(invoiceElm) {
+function getInvoiceInfo(invoiceElm, options) {
+  var summary = getInvoiceSummary(invoiceElm);
+  var charges = getInvoiceCharges(invoiceElm, options);
+  var groups = processChargeGroups(charges, options.groups);
+
   return {
-    summary: getInvoiceSummary(invoiceElm),
-    charges: getInvoiceCharges(invoiceElm, options)
+    summary: summary,
+    charges: charges,
+    groups: groups
   };
 }
 
