@@ -23,20 +23,28 @@ function getRawAmount(amount, currencySymbol) {
 /****************************************************************************/
 
 function processChargeGroups(charges, groups) {
-  var processedGroups = [];
+  var groupsMap = {};
 
   if (groups && groups.length) {
     charges.forEach(function(charge) {
       groups.forEach(function(group) {
-        if (charge.description.includes(groups)) {
+        if (!groupsMap[group]) {
+          groupsMap[group] = {
+            title: group,
+            qtyItems: 0,
+            amount: 0
+          };
+        }
 
+        if (charge.description.includes(groups)) {
+          groupsMap[group]["qtyItems"] += 1;
+          groupsMap[group]["amount"] += parseFloat(charge.amount.raw);
         }
       });
-      console.log("charge", charge);
     });
   }
 
-  return processedGroups;
+  return Object.values(groupsMap);
 }
 
 function getInvoices(type) {
@@ -125,7 +133,7 @@ function main(options) {
 var options = {
   processInvoices: "current", // "current" or "all"
   currencySymbol: "R$",
-  groups: [ "Uber" ],
+  groups: [ "Uber", "Distribuidora Super" ],
   chargeSynonyms: [
     {
       from: "Christiano Amaral",
