@@ -22,6 +22,63 @@ function getRawAmount(amount, currencySymbol) {
 /*                              INVOICE PROCESS                             */
 /****************************************************************************/
 
+function processChargeGroups(charges, groups) {
+  var processedGroups = [];
+  var mappedGroups = {};
+  var groupCharges = {};
+  var rewardsCharges = {};
+
+  if (groups && groups.length) {
+    charges.forEach(function(charge) {
+      var chargeAmountRaw = charge.amount.raw;
+      groups.forEach(function(group) {
+        if (!mappedGroups[group]) {
+          mappedGroups[group] = {
+            qty: 0,
+            amount: 0,
+            charges: []
+          };
+        }
+
+        if (charge.description.includes("Rewards")) {
+          rewardsCharges[String(chargeAmountRaw).replace("-", "")] = charge;
+          console.log("rewards charge", charge);
+        }
+
+        else if (charge.description.includes(groups)) {
+          groupCharges[String(chargeAmountRaw)] = charge;
+          console.log("group charge", charge);
+
+          /*
+          console.log(rewardsCharges[charge.amount.raw]);
+          if (!rewardsCharges[charge.amount.raw]) {
+            mappedGroups[group].qty++;
+            mappedGroups[group].amount += parseFloat(charge.amount.raw);
+            mappedGroups[group].charges.push(charge);
+            console.log("olé", charge);
+          } else {
+            console.log("desconsiderado", charge);
+          }
+          */
+        }
+
+        if (rewardsCharges) {
+
+        }
+      });
+
+      console.log("rewardsCharges", rewardsCharges);
+      console.log("groupCharges", groupCharges);
+    });
+
+
+  }
+
+  
+
+  return processedGroups;
+}
+
 function getInvoices(type) {
   var invoicesSelector = (type === "all")
 
@@ -35,10 +92,15 @@ function getInvoices(type) {
   return Array.from(document.querySelectorAll(invoicesSelector));
 }
 
-function getInvoiceInfo(invoiceElm) {
+function getInvoiceInfo(invoiceElm, options) {
+  var summary = getInvoiceSummary(invoiceElm);
+  var charges = getInvoiceCharges(invoiceElm, options);
+  var groups = processChargeGroups(charges, options.groups);
+
   return {
-    summary: getInvoiceSummary(invoiceElm),
-    charges: getInvoiceCharges(invoiceElm, options)
+    summary: summary,
+    charges: charges,
+    groups: groups
   };
 }
 
